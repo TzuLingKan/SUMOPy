@@ -1,0 +1,5 @@
+* text=auto
+
+*.txt text
+
+*.xml text eol=lf

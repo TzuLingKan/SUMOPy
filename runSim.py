@@ -53,6 +53,7 @@ def init(iteration = 0):
     optParser.add_option("-c", "--config", type="string", dest="CONFIGNAME",
                          default=None, help="SUMO config to use")
     (options, args) = optParser.parse_args()
+    setting.verbose = options.verbose    
     
     completeCommand = [SUMO]
     if options.gui:
@@ -64,23 +65,32 @@ def init(iteration = 0):
     if iteration > 0:
         completeCommand += ["--fcd-output","./Results/out%s.xml" % (iteration)]   
     
+    ## start SUMO
     sumoProcess = subprocess.Popen(completeCommand, stdout=sys.stdout,
                                     stderr=sys.stderr)
     traci.init(PORT, 4)
     traci.simulation.subscribe()
     
-    setting.verbose = options.verbose
+    ## loop
     try:
-        while step.step < 200 and not setting.collisionOccurred:
+        while takeNextStep():
             doStep()
     finally:
         if not setting.collisionOccurred:        
             print "made it to the end without a collision"
         traci.close()
         sumoProcess.wait()
-        
         if iteration > 0:
+            step.step = 0
             return  setting.collisionOccurred
+
+
+def takeNextStep():
+    result = step.step < MAXSTEPS
+    result &= traci.simulation.getMinExpectedNumber() > 0
+    result &= not setting.collisionOccurred
+    return result
+
 
 def getFromSubscription(vehID, subs, varNames):
     ## extracts specified elements from subscription and returns
@@ -97,6 +107,7 @@ def getFromSubscription(vehID, subs, varNames):
             data.append(subs[varName])
     return data
     
+    
 def getController(vehID, params = None):
     # The vehicle type names in the .rou file determine the control type
     # npc = use default SUMO motion
@@ -112,6 +123,7 @@ def getController(vehID, params = None):
         return Controllers.Braker(vehID, params)
     raise KeyError("no matching controller for type",vtype)
 
+
 def getSetParams(vehID):
     # these are vehicle variables that will not change over time
     timeStep = traci.simulation.getDeltaT() / 1000.0;
@@ -119,6 +131,7 @@ def getSetParams(vehID):
             traci.vehicle.getWidth(vehID),
             traci.vehicle.getAccel(vehID) * timeStep,
             traci.vehicle.getDecel(vehID) * timeStep]
+
 
 def doStep():
     step.step += 1

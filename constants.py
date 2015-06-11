@@ -20,6 +20,7 @@ sys.path.append(os.path.realpath(toolsPathName))
 PORT = 8800
 INFINITY = 1e400
 EPS = .0001
+MAXSTEPS = 10000
 
 try:
     from sumolib import checkBinary

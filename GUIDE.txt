@@ -1,11 +1,7 @@
 "python runSim.py" should run the simulation.
-	
 "python runSim.py -g" will run it on the SUMO GUI.
-
 "python runSim.py -v" includes step-by-step info on position and speed.
-
 "python runSims.py n" runs a simulation n times and stores the output in the Results folder.
-	
 Change the SUMO configuration by changing the line CONFIGNAME="this.sumocfg" in runSim.py
-
-To change the model used for each car, change its type in the .rou file.  Ex: changing veh1 in collide1.rou to type "npc" will make it stay far away from the other car.
+To change the model used for each car, change its type in the .rou file.
+Ex: changing veh1 in collide1.rou to type "npc" will make it stay far away from the other car.

@@ -111,17 +111,11 @@ def getFromSubscription(vehID, subs, varNames):
 def getController(vehID, params = None):
     # The vehicle type names in the .rou file determine the control type
     # npc = use default SUMO motion
-    # Is there a cleverer way to convert these names to functions?
+    # be careful to spell name correctly!
     vtype = traci.vehicle.getTypeID(vehID)
-    if vtype == "BasicControl":
-        return Controllers.BasicControl(vehID, params)
-    if vtype == "NoControl":
-        return Controllers.NoControl(vehID, params)
     if vtype == "npc":
         return None
-    if vtype == "Braker":
-        return Controllers.Braker(vehID, params)
-    raise KeyError("no matching controller for type",vtype)
+    return eval("Controllers."+vtype+"(vehID, params)")
 
 
 def getSetParams(vehID):

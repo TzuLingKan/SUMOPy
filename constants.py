@@ -96,3 +96,11 @@ class VState:
                 self.maxdecel = 1.0
         else:
             self.maxdecel = maxdecel
+    
+    def copy(self):
+        return VState(self.vehID, self.x, self.y, self.angle,
+                      self.speed, self.length, self.width,
+                      self.maxaccel, self.maxdecel)
+    
+    def __repr__(self):
+        return "(%s,%s) angle:%s" % (self.x, self.y, self.angle)

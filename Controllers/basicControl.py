@@ -37,17 +37,19 @@ class BasicControl:
                     speed = 0
         return speed
     
-    def TTC(self, speed, obst):
-        eps = .001      
-        if (obst.angle + eps) % math.pi < 2*eps:
-            if obst.speed == speed:
+    def TTC(self, myspeed, obst):
+        eps = .001
+        xSpeed = obst.speed * math.sin(obst.angle)
+        ySpeed = obst.speed * math.cos(obst.angle)
+        if abs(xSpeed) < eps:
+            if ySpeed == myspeed:
                 return INFINITY
             if obst.y > 0: 
-                return (obst.y - self.length)*1.0 / (obst.speed - speed)
-            return (obst.y + obst.length)*1.0 / (obst.speed - speed)
-        tCross = -obst.x / (obst.speed * math.sin(obst.angle))
-        yMe = -tCross * speed
-        yObstacle = obst.y - obst.speed * math.cos(obst.angle) * tCross
+                return (obst.y - self.length)*1.0 / (ySpeed - myspeed)
+            return (obst.y + obst.length)*1.0 / (ySpeed - myspeed)
+        tCross = -obst.x / (xSpeed)
+        yMe = -tCross * myspeed
+        yObstacle = obst.y - ySpeed * tCross
         minDistance = pow(pow(obst.length,2)+pow(obst.width,2)/4.0,.5) + self.length
         if abs(yMe - yObstacle) + eps < minDistance:
             return tCross

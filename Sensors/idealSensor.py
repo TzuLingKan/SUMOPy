@@ -27,10 +27,11 @@ class IdealSensor():
         relativeDist = pow((pow(tempx,2) + pow(tempy,2)),.5)
         relativeAngle = atan2(tempy,tempx)
         rotationAngle = relativeAngle - self.state.angle
-        realignedState=VState(vstate.vehID,
-                                relativeDist * cos(rotationAngle),
-                                relativeDist * sin(rotationAngle),
-                                newAngle, vstate.speed)
+        
+        realignedState = vstate.copy()
+        realignedState.x = relativeDist * cos(rotationAngle)
+        realignedState.y = relativeDist * sin(rotationAngle)
+        realignedState.angle = newAngle
         self.obstacles.append(realignedState)
     
     def getObstacles(self):

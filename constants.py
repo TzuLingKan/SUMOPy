@@ -31,6 +31,7 @@ NETCONVERT = checkBinary("netconvert")
 SUMO = checkBinary("sumo")
 SUMOGUI = checkBinary("sumo-gui")
 
+
 class VState:
     # meant to pass all necessary information about vehicles between
     # scripts.  Can take either listed input, or one-by-one input.

@@ -9,17 +9,13 @@ sys.path.append(os.path.dirname(__file__)[:-len("/Controllers")])
 from constants import * # sys.path is modified here
 
 class NoControl:
-    def __init__(self, vehID, vParams = None):
+    def __init__(self, vehID, vParams = None, DELTAT=1.0):
         self.ID = vehID
         self.speed = None
         self.obstacles = {}
         if vParams == None:
-            self.length = 4
-            self.width = 2
             self.maxAccel = 1
         else:
-            self.length = vParams[0]
-            self.width = vParams[1]
             self.maxAccel = vParams[2]
         
     def updateSpeed(self, speed):

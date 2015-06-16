@@ -32,6 +32,7 @@ dataFromTraciState = [tc.VAR_POSITION, tc.VAR_ANGLE, tc.VAR_SPEED]
 
 class Setting:
     collisionOccurred = False
+    collisionAllowed = False    
     verbose = False
 setting = Setting()
 
@@ -52,8 +53,11 @@ def init(iteration = 0):
                          default=False, help="run with GUI")
     optParser.add_option("-c", "--config", type="string", dest="CONFIGNAME",
                          default=None, help="SUMO config to use")
+    optParser.add_option("--allow", action="store_true", dest="allowed",
+                         default=False, help="insert to ignore collisions")
     (options, args) = optParser.parse_args()
-    setting.verbose = options.verbose    
+    setting.verbose = options.verbose
+    setting.collisionAllowed = options.allowed
     
     completeCommand = [SUMO]
     if options.gui:
@@ -70,7 +74,7 @@ def init(iteration = 0):
                                     stderr=sys.stderr)
     traci.init(PORT, 4)
     traci.simulation.subscribe()
-    
+
     ## loop
     try:
         while takeNextStep():
@@ -87,8 +91,8 @@ def init(iteration = 0):
 
 def takeNextStep():
     result = step.step < MAXSTEPS
-    result &= traci.simulation.getMinExpectedNumber() > 0
-    result &= not setting.collisionOccurred
+    result &= traci.simulation.getMinExpectedNumber() > 0    
+    result &= setting.collisionAllowed or not setting.collisionOccurred
     return result
 
 
@@ -113,18 +117,19 @@ def getController(vehID, params = None):
     # npc = use default SUMO motion
     # be careful to spell name correctly!
     vtype = traci.vehicle.getTypeID(vehID)
+    DeltaT = traci.simulation.getDeltaT() / 1000.0
     if vtype == "npc":
         return None
-    return eval("Controllers."+vtype+"(vehID, params)")
+    return eval("Controllers."+vtype+"(vehID, params, DeltaT)")
 
 
 def getSetParams(vehID):
     # these are vehicle variables that will not change over time
-    timeStep = traci.simulation.getDeltaT() / 1000.0;
+    #timeStep = traci.simulation.getDeltaT() / 1000.0
     return [traci.vehicle.getLength(vehID),
             traci.vehicle.getWidth(vehID),
-            traci.vehicle.getAccel(vehID) * timeStep,
-            traci.vehicle.getDecel(vehID) * timeStep]
+            traci.vehicle.getAccel(vehID),
+            traci.vehicle.getDecel(vehID)]
 
 
 def doStep():
@@ -138,10 +143,12 @@ def doStep():
         traci.vehicle.subscribe(v,dataFromTraciState)
         vehicleSetParams[v] = getSetParams(v)
         controllers[v] = getController(v, vehicleSetParams[v])
-        if True:#controllers[v] is not None:
+        if controllers[v] is not None: #True
             if setting.verbose:
                 print "allowing forward and lane crashes for",v
             traci._sendIntCmd(tc.CMD_SET_VEHICLE_VARIABLE, tc.VAR_SPEEDSETMODE, v, 22)
+            traci.vehicle.setLaneChangeMode(v, 85)
+            #traci.vehicle.changeLane(v, 0, 10000)
     # gather vehicle states for this step
     vStates = {}
     for vehID, subs in traci.vehicle.getSubscriptionResults().iteritems():        

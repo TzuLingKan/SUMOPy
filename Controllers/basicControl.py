@@ -10,7 +10,7 @@ from constants import * # sys.path is modified here
 import math
 
 class BasicControl:
-    def __init__(self, vehID, vParams = None):
+    def __init__(self, vehID, vParams = None, DELTAT=1.0):
         self.ID = vehID
         self.speed = None
         self.obstacles = {}
@@ -22,12 +22,13 @@ class BasicControl:
             self.length = vParams[0]
             self.width = vParams[1]
             self.maxAccel = vParams[2]
+        self.DELTAT = DELTAT
         
     def updateSpeed(self, speed):
         self.speed = speed
     
     def nextStep(self, obstacles):
-        speed = self.speed + self.maxAccel
+        speed = self.speed + self.maxAccel * self.DELTAT
         for vstate in obstacles:
             self.obstacles[vstate.vehID] = vstate
             if vstate.vehID != self.ID:

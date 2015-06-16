@@ -11,20 +11,14 @@ import random
 
 
 class Braker:
-    def __init__(self, vehID, vParams = None):
+    def __init__(self, vehID, vParams = None, DELTAT=1.0):
         self.ID = vehID
         self.speed = None
         self.obstacles = {}
         if vParams == None:
-            self.length = 4
-            self.width = 2
-            self.maxAccel = 1
-            self.maxDecel = 1
+            self.maxDecel = 1.0 * DELTAT
         else:
-            self.length = vParams[0]
-            self.width = vParams[1]
-            self.maxAccel = vParams[2]
-            self.maxDecel = vParams[3]
+            self.maxDecel = vParams[3] * DELTAT
         self.braking = []
         
     def updateSpeed(self, speed):

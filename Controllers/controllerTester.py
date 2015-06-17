@@ -30,10 +30,10 @@ print "test 2",subject.nextStep([car1])
 car1 = VState("a", -6.0, -11.0, math.pi/2, 5.0, 4.0, 2.0, 2.0, 2.0)
 print "test 3",subject.nextStep([car1])
 
-## test 4 - perpendicular, you hit back
+## test 4 - perpendicular, you hit their back
 car1 = VState("a", -1.0, -11.0, math.pi/2, 5.0, 4.0, 2.0, 2.0, 2.0)
 print "test 4",subject.nextStep([car1])
 
 ## test 5 - perpendicular, they hit your back
 car1 = VState("a", -6.0, -6.0, math.pi/2, 5.0, 4.0, 2.0, 2.0, 2.0)
-print "test 4",subject.nextStep([car1])
+print "test 5",subject.nextStep([car1])

@@ -39,7 +39,7 @@ class JoererControl:
             self.obstaccels[vid] = (obst.speed -
                                 self.obstacles[vid].speed) / self.DELTAT
         else:
-            self.obstaccels[vid] = 0
+            self.obstaccels[vid] = None
         
     def nextStep(self, obstacles):
         newObstacles = {}
@@ -49,7 +49,7 @@ class JoererControl:
         self.obstacles = newObstacles  # gets rid of old vehicles
             
         ## try a number of accelerations, see which have high collision prob.
-        resolution = 10
+        resolution = 5
         probCutoff = .4
         potentialAccels = numpy.arange(-self.maxDecel, self.maxAccel,
                             (self.maxAccel + self.maxDecel)*1.0 / resolution)
@@ -103,21 +103,32 @@ class JoererControl:
         return INFINITY  ## figure out the rest later, not in paper anyway
         
     def PC(self, myaccel, obstacle):
-        [avals, apdf] = unifDist(-obstacle.maxdecel,
-                            obstacle.maxaccel, 10)
+        res = 8
+        measuredAccel = self.obstaccels[obstacle.vehID]
+        if measuredAccel is None or measuredAccel >= obstacle.maxaccel:
+            [avals, apdf] = unifDist(-obstacle.maxdecel, obstacle.maxaccel,
+                            res)
+        else:
+            [avals, apdf] = triangDist(-obstacle.maxdecel, obstacle.maxaccel,
+                            measuredAccel, res)
         for i in range(len(avals)):
             if not 0 <= self.TTC(myaccel, avals[i], obstacle) < 5:
                 apdf[i] = 0
         return sum(apdf)
         
 def unifDist(amin, amax, res):
-    x = list(numpy.arange(amin, amax, (amax - amin)*1.0/res))
-    fx = [1.0 / len(x)] * len(x)
-    return [x, fx]
+    x = numpy.arange(amin, amax, (amax - amin)*1.0/res)
+    fx = [1.0 / x.size] * x.size
+    return [list(x), fx]
     
 def triangDist(amin, amax, acenter, res):
-    x = list(numpy.arange(amin, amax, (amax - amin)*1.0/res))
-    peakhigh = 2 / (amax - amin)
-    peakloc = [i > acenter for i in x].index(True)
-    fx = [1.0 / len(x)] * len(x)
-    return [x, fx]
+    x = numpy.arange(amin, amax, (amax - amin)*1.0/res)
+    peakhigh = 2.0 / (amax - amin)
+    if max(x) > acenter:
+        peakloc = [i > acenter for i in x].index(True)
+    else:
+        peakloc = x.size
+    lefthalf = (x.copy() - amin) * peakhigh / (acenter - amin)
+    righthalf = (x.copy() - amax) * peakhigh / (acenter - amax)
+    fx = numpy.append(lefthalf[0:peakloc], righthalf[peakloc:x.size])
+    return [list(x), list(fx)]
